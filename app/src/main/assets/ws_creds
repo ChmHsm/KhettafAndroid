@@ -1,0 +1,8 @@
+[
+  {"app_name":"android-khettaf",
+  "password":"123456",
+  "token_url":"http://khettafws.herokuapp.com/oauth/token",
+  "auth_url":"https://khettafws.herokuapp.com/oauth/authorize",
+  "grant_type":"password",
+  "scope":"write"}
+]
