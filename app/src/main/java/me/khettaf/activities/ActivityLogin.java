@@ -13,12 +13,25 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.raizlabs.android.dbflow.config.FlowManager;
+import com.raizlabs.android.dbflow.structure.database.transaction.FastStoreModelTransaction;
+
 import java.io.IOException;
+import java.util.List;
 
 import ca.mimic.oauth2library.OAuth2Client;
 import ca.mimic.oauth2library.OAuthResponse;
 import me.khettaf.R;
 import me.khettaf.activities.utils.AccessProperties;
+import me.khettaf.database.MyApp;
+import me.khettaf.entities.Trajet;
+import me.khettaf.retrofittedWS.ServiceGenerator;
+import me.khettaf.retrofittedWS.TrajetsInterface;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.jackson.JacksonConverterFactory;
 
 import static me.khettaf.activities.utils.AccessProperties.getProperty;
 import static me.khettaf.activities.utils.Connectivity.isNetworkAvailable;
@@ -120,13 +133,41 @@ public class ActivityLogin extends AppCompatActivity {
                             .show();
                 }
                 else{
-                    //TODO store access and refresh tokens then continue to next activity
+                    //TODO store expiresAt value in sharedPrefs
                     message.getExpiresAt();
                     SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = sharedPref.edit();
                     editor.putString(getString(R.string.access_token), message.getAccessToken());
                     editor.putString(getString(R.string.refresh_token), message.getRefreshToken());
                     editor.apply();
+
+                    TrajetsInterface api = ServiceGenerator.createService(TrajetsInterface.class);
+
+                    Call<List<Trajet>> call = api.getAllTrajets(message.getAccessToken());
+                    call.enqueue(new Callback<List<Trajet>>() {
+                        @Override
+                        public void onResponse(Call<List<Trajet>> call, Response<List<Trajet>> response) {
+                            List<Trajet> trajets = response.body();
+
+                            FlowManager.init(getApplicationContext());
+
+                            FastStoreModelTransaction
+                                    .deleteBuilder(FlowManager.getModelAdapter(Trajet.class))
+                                    .addAll(trajets)
+                                    .build();
+
+                            FastStoreModelTransaction
+                                    .insertBuilder(FlowManager.getModelAdapter(Trajet.class))
+                                    .addAll(trajets)
+                                    .build();
+                        }
+
+                        @Override
+                        public void onFailure(Call<List<Trajet>> call, Throwable t) {
+                            t.getMessage();
+                        }
+                    });
+
                 }
             }
             else{

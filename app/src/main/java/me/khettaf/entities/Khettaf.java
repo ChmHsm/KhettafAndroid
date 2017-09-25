@@ -19,7 +19,7 @@ public class Khettaf  extends BaseModel implements Serializable  {
     private Long id;
 
     @Column
-    private String utilisateur;
+    private String username;
 
     @Column
     private String password;
@@ -29,16 +29,16 @@ public class Khettaf  extends BaseModel implements Serializable  {
     }
 
     public Khettaf(String username, String password) {
-        this.utilisateur = username;
+        this.username = username;
         this.password = password;
     }
 
-    public String getUtilisateur() {
-        return utilisateur;
+    public String getUsername() {
+        return username;
     }
 
-    public void setUtilisateur(String utilisateur) {
-        this.utilisateur = utilisateur;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getPassword() {

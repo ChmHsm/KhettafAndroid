@@ -74,8 +74,7 @@
                 android:layout_height="wrap_content"
                 style="@style/linkTextView"
                 android:text="@string/forgotPassword"
-                android:layout_margin="8dp"
-                android:padding="8dp"/>
+                android:padding="10dp"/>
 
             <TextView
                 android:id="@+id/textView3"
@@ -83,8 +82,7 @@
                 android:layout_height="wrap_content"
                 style="@style/linkTextView"
                 android:text="@string/createAccount"
-                android:layout_margin="8dp"
-                android:padding="8dp"/>
+                android:padding="10dp"/>
         </LinearLayout>
 
     </LinearLayout>

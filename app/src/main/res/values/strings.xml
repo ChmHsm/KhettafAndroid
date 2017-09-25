@@ -4,11 +4,11 @@
     <string name="refresh_token">refreshToken</string>
     <string name="loginUsername">Username</string>
     <string name="loginPassword">Password</string>
-    <string name="login">Login</string>
-    <string name="forgotPassword">Forgot password?</string>
-    <string name="createAccount">Create account</string>
+    <string name="login">Connexion</string>
+    <string name="forgotPassword">Mot de passe oublié ?</string>
+    <string name="createAccount">Créer votre compte</string>
     <string name="KhettafMotto">Covoiturage Made Easy.</string>
-    <string name="loggingIn">Connexion en cours...</string>
+    <string name="loggingIn">Connexion en cours&#8230;</string>
     <string name="networkUnavailable">Accès internet indisponible</string>
     <string name="loginFailed">Echéc de la connexion</string>
 </resources>
