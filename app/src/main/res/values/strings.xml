@@ -1,7 +1,9 @@
 <resources>
     <string name="app_name">Khettaf</string>
+    <string name="authentication_prefs">authentication</string>
     <string name="access_token">accessToken</string>
     <string name="refresh_token">refreshToken</string>
+    <string name="token_expires_at">expiresAt</string>
     <string name="loginUsername">Username</string>
     <string name="loginPassword">Password</string>
     <string name="login">Connexion</string>

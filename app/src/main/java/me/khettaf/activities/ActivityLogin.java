@@ -9,7 +9,9 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.AttributeSet;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -34,7 +36,10 @@ import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
 import static me.khettaf.activities.utils.AccessProperties.getProperty;
+import static me.khettaf.activities.utils.Authentication.isAuthenticationRequired;
+import static me.khettaf.activities.utils.Authentication.isRefreshTokenAvailable;
 import static me.khettaf.activities.utils.Connectivity.isNetworkAvailable;
+import static me.khettaf.activities.utils.InputHandling.hideKeyboard;
 
 public class ActivityLogin extends AppCompatActivity {
 
@@ -65,16 +70,32 @@ public class ActivityLogin extends AppCompatActivity {
                 }
             }
         });
+        hideKeyboard(ActivityLogin.this);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if(!isAuthenticationRequired(ActivityLogin.this)){
+            //TODO stop current activity and start next activity
+        }
+        else{
+            if(isRefreshTokenAvailable(ActivityLogin.this)){
+                //TODO get new access token using the refresh token and start next activity
+            }
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        hideKeyboard(ActivityLogin.this);
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
+        hideKeyboard(ActivityLogin.this);
     }
 
     @Override
@@ -133,12 +154,13 @@ public class ActivityLogin extends AppCompatActivity {
                             .show();
                 }
                 else{
-                    //TODO store expiresAt value in sharedPrefs
                     message.getExpiresAt();
-                    SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+                    SharedPreferences sharedPref = getSharedPreferences(
+                            getString(R.string.authentication_prefs), Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = sharedPref.edit();
                     editor.putString(getString(R.string.access_token), message.getAccessToken());
                     editor.putString(getString(R.string.refresh_token), message.getRefreshToken());
+                    editor.putLong(getString(R.string.token_expires_at), message.getExpiresAt());
                     editor.apply();
 
                     TrajetsInterface api = ServiceGenerator.createService(TrajetsInterface.class);
@@ -160,6 +182,8 @@ public class ActivityLogin extends AppCompatActivity {
                                     .insertBuilder(FlowManager.getModelAdapter(Trajet.class))
                                     .addAll(trajets)
                                     .build();
+
+                            //TODO start next activity
                         }
 
                         @Override

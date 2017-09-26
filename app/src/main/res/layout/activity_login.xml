@@ -39,7 +39,7 @@
             android:layout_marginStart="40dp"
             android:ems="10"
             android:inputType="textPersonName"
-            android:text="@string/loginUsername" />
+            android:text="@string/loginUsername"/>
 
         <EditText
             android:id="@+id/passwordEditText"
