@@ -3,15 +3,13 @@ package me.khettaf.activities;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.AttributeSet;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -24,18 +22,15 @@ import java.util.List;
 import ca.mimic.oauth2library.OAuth2Client;
 import ca.mimic.oauth2library.OAuthResponse;
 import me.khettaf.R;
-import me.khettaf.activities.utils.AccessProperties;
-import me.khettaf.database.MyApp;
 import me.khettaf.entities.Trajet;
 import me.khettaf.retrofittedWS.ServiceGenerator;
 import me.khettaf.retrofittedWS.TrajetsInterface;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.jackson.JacksonConverterFactory;
 
 import static me.khettaf.activities.utils.AccessProperties.getProperty;
+import static me.khettaf.activities.utils.Authentication.isAccessTokenAvailable;
 import static me.khettaf.activities.utils.Authentication.isAuthenticationRequired;
 import static me.khettaf.activities.utils.Authentication.isRefreshTokenAvailable;
 import static me.khettaf.activities.utils.Connectivity.isNetworkAvailable;
@@ -51,6 +46,32 @@ public class ActivityLogin extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if(!isAuthenticationRequired(ActivityLogin.this)){
+            Intent intent = new Intent(ActivityLogin.this, TrajetsMainActivity.class);
+            startActivity(intent);
+            finish();
+        }
+        else{
+            if(isRefreshTokenAvailable(ActivityLogin.this)){
+                //TODO get new access token using the refresh token and start next activity
+                SharedPreferences authPrefs = getSharedPreferences(
+                        getString(R.string.authentication_prefs), Context.MODE_PRIVATE);
+
+                String username = authPrefs.getString(
+                        getString(R.string.last_username), "");
+                String password = authPrefs.getString(
+                        getString(R.string.last_password), "");
+
+                if(!username.equals("") && !password.equals("")){
+                    usernameEditText.setText(username);
+                    passwordEditText.setText(password);
+                    new SendCredentialsAndGetAccessToken().execute();
+                }
+
+            }
+        }
+
         setContentView(R.layout.activity_login);
 
         loginButton = (Button) findViewById(R.id.loginButton);
@@ -76,14 +97,7 @@ public class ActivityLogin extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        if(!isAuthenticationRequired(ActivityLogin.this)){
-            //TODO stop current activity and start next activity
-        }
-        else{
-            if(isRefreshTokenAvailable(ActivityLogin.this)){
-                //TODO get new access token using the refresh token and start next activity
-            }
-        }
+
     }
 
     @Override
@@ -161,6 +175,8 @@ public class ActivityLogin extends AppCompatActivity {
                     editor.putString(getString(R.string.access_token), message.getAccessToken());
                     editor.putString(getString(R.string.refresh_token), message.getRefreshToken());
                     editor.putLong(getString(R.string.token_expires_at), message.getExpiresAt());
+                    editor.putString(getString(R.string.last_username), username);
+                    editor.putString(getString(R.string.last_password), password);
                     editor.apply();
 
                     TrajetsInterface api = ServiceGenerator.createService(TrajetsInterface.class);
