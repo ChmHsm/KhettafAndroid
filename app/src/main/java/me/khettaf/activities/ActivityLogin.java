@@ -13,8 +13,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.raizlabs.android.dbflow.config.DatabaseDefinition;
 import com.raizlabs.android.dbflow.config.FlowManager;
+import com.raizlabs.android.dbflow.structure.database.DatabaseWrapper;
 import com.raizlabs.android.dbflow.structure.database.transaction.FastStoreModelTransaction;
+import com.raizlabs.android.dbflow.structure.database.transaction.ITransaction;
+import com.raizlabs.android.dbflow.structure.database.transaction.Transaction;
 
 import java.io.IOException;
 import java.util.List;
@@ -22,6 +26,7 @@ import java.util.List;
 import ca.mimic.oauth2library.OAuth2Client;
 import ca.mimic.oauth2library.OAuthResponse;
 import me.khettaf.R;
+import me.khettaf.database.AppDatabase;
 import me.khettaf.entities.Trajet;
 import me.khettaf.retrofittedWS.ServiceGenerator;
 import me.khettaf.retrofittedWS.TrajetsInterface;
@@ -47,31 +52,6 @@ public class ActivityLogin extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if(!isAuthenticationRequired(ActivityLogin.this)){
-            Intent intent = new Intent(ActivityLogin.this, TrajetsMainActivity.class);
-            startActivity(intent);
-            finish();
-        }
-        else{
-            if(isRefreshTokenAvailable(ActivityLogin.this)){
-                //TODO get new access token using the refresh token and start next activity
-                SharedPreferences authPrefs = getSharedPreferences(
-                        getString(R.string.authentication_prefs), Context.MODE_PRIVATE);
-
-                String username = authPrefs.getString(
-                        getString(R.string.last_username), "");
-                String password = authPrefs.getString(
-                        getString(R.string.last_password), "");
-
-                if(!username.equals("") && !password.equals("")){
-                    usernameEditText.setText(username);
-                    passwordEditText.setText(password);
-                    new SendCredentialsAndGetAccessToken().execute();
-                }
-
-            }
-        }
-
         setContentView(R.layout.activity_login);
 
         loginButton = (Button) findViewById(R.id.loginButton);
@@ -91,6 +71,32 @@ public class ActivityLogin extends AppCompatActivity {
                 }
             }
         });
+
+        if(!isAuthenticationRequired(ActivityLogin.this)){
+            Intent intent = new Intent(ActivityLogin.this, TrajetsMainActivity.class);
+            startActivity(intent);
+            finish();
+        }
+        else{
+            if(isRefreshTokenAvailable(ActivityLogin.this)){
+
+                SharedPreferences authPrefs = getSharedPreferences(
+                        getString(R.string.authentication_prefs), Context.MODE_PRIVATE);
+
+                String username = authPrefs.getString(
+                        getString(R.string.last_username), "");
+                String password = authPrefs.getString(
+                        getString(R.string.last_password), "");
+
+                if(!username.equals("") && !password.equals("")){
+                    usernameEditText.setText(username);
+                    passwordEditText.setText(password);
+                    new SendCredentialsAndGetAccessToken().execute();
+                }
+
+            }
+        }
+
         hideKeyboard(ActivityLogin.this);
     }
 
@@ -185,21 +191,28 @@ public class ActivityLogin extends AppCompatActivity {
                     call.enqueue(new Callback<List<Trajet>>() {
                         @Override
                         public void onResponse(Call<List<Trajet>> call, Response<List<Trajet>> response) {
-                            List<Trajet> trajets = response.body();
+                            final List<Trajet> trajets = response.body();
 
-                            FlowManager.init(getApplicationContext());
+//                            FastStoreModelTransaction
+//                                    .saveBuilder(FlowManager.getModelAdapter(Trajet.class))
+//                                    .addAll(trajets)
+//                                    .build();
 
-                            FastStoreModelTransaction
-                                    .deleteBuilder(FlowManager.getModelAdapter(Trajet.class))
-                                    .addAll(trajets)
-                                    .build();
+                            DatabaseDefinition database = FlowManager.getDatabase(AppDatabase.class);
+                            Transaction transaction = database.beginTransactionAsync(new ITransaction() {
+                                @Override
+                                public void execute(DatabaseWrapper databaseWrapper) {
+                                    FastStoreModelTransaction
+                                            .saveBuilder(FlowManager.getModelAdapter(Trajet.class))
+                                            .addAll(trajets)
+                                            .build();
+                                }
+                            }).build();
+                            transaction.execute();
 
-                            FastStoreModelTransaction
-                                    .insertBuilder(FlowManager.getModelAdapter(Trajet.class))
-                                    .addAll(trajets)
-                                    .build();
-
-                            //TODO start next activity
+                            Intent intent = new Intent(ActivityLogin.this, TrajetsMainActivity.class);
+                            startActivity(intent);
+                            finish();
                         }
 
                         @Override
