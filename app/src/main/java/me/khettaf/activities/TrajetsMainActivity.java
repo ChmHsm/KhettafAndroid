@@ -29,7 +29,7 @@ import me.khettaf.entities.Trajet;
 
 public class TrajetsMainActivity extends AppCompatActivity {
 
-    private ArrayList<Trajet> trajets;
+    private ArrayList<Trajet> trajets= new ArrayList<>();
     private TrajetsAdapter trajetsAdapter;
     private RecyclerView trajetsRecyclerView;
     private ProgressDialog progressDialog;
@@ -40,7 +40,6 @@ public class TrajetsMainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main_trajets);
 
         trajetsRecyclerView = (RecyclerView) findViewById(R.id.trajetRecyclerView);
-        trajets = new ArrayList<>();
         trajetsAdapter = new TrajetsAdapter(trajets);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(TrajetsMainActivity.this);
         trajetsRecyclerView.setLayoutManager(layoutManager);
@@ -58,19 +57,17 @@ public class TrajetsMainActivity extends AppCompatActivity {
         progressDialog.setMessage(getResources().getString(R.string.loggingIn));
         progressDialog.show();
 
-        FlowQueryList<Trajet> list = SQLite.select()
-                .from(Trajet.class)
-                .where() // some conditions
-                .flowQueryList();
-
         SQLite.select()
                 .from(Trajet.class)
                 .async()
                 .queryListResultCallback(new QueryTransaction.QueryResultListCallback<Trajet>() {
                     @Override
                     public void onListQueryResult(QueryTransaction transaction, @NonNull List<Trajet> tResult) {
-                        trajets.clear();
-                        trajets = new ArrayList<>(tResult);
+                        for (Trajet trajet : tResult
+                             ) {
+                            trajets.add(trajet);
+                        }
+                        trajetsAdapter.notifyDataSetChanged();
                         progressDialog.hide();
                         progressDialog.dismiss();
                     }

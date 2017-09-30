@@ -27,15 +27,14 @@ public class TrajetsAdapter extends RecyclerView.Adapter<TrajetViewHolder>{
     public void onBindViewHolder(TrajetViewHolder holder, int position) {
         Trajet trajet = trajets.get(position);
         holder.setTrajet(trajet);
-        trajet.getDepart().load();
         holder.departTextView.setText(trajet.getDepart().getNom());
     }
 
     public TrajetViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View trajetHholderView = LayoutInflater.from(parent.getContext())
+        View trajetHolderView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.recycler_view_item_trajet, parent, false);
 
-        return new TrajetViewHolder(trajetHholderView);
+        return new TrajetViewHolder(trajetHolderView);
     }
 
     @Override

@@ -27,6 +27,8 @@ import ca.mimic.oauth2library.OAuth2Client;
 import ca.mimic.oauth2library.OAuthResponse;
 import me.khettaf.R;
 import me.khettaf.database.AppDatabase;
+import me.khettaf.entities.Khettaf;
+import me.khettaf.entities.POI;
 import me.khettaf.entities.Trajet;
 import me.khettaf.retrofittedWS.ServiceGenerator;
 import me.khettaf.retrofittedWS.TrajetsInterface;
@@ -165,8 +167,7 @@ public class ActivityLogin extends AppCompatActivity {
         @Override
         protected void onPostExecute(OAuthResponse message) {
             super.onPostExecute(message);
-            progressDialog.hide();
-            progressDialog.dismiss();
+
             if(message != null){
                 if(message.getCode() != 200){
                     Snackbar
@@ -193,22 +194,25 @@ public class ActivityLogin extends AppCompatActivity {
                         public void onResponse(Call<List<Trajet>> call, Response<List<Trajet>> response) {
                             final List<Trajet> trajets = response.body();
 
-//                            FastStoreModelTransaction
-//                                    .saveBuilder(FlowManager.getModelAdapter(Trajet.class))
-//                                    .addAll(trajets)
-//                                    .build();
 
                             DatabaseDefinition database = FlowManager.getDatabase(AppDatabase.class);
                             Transaction transaction = database.beginTransactionAsync(new ITransaction() {
                                 @Override
                                 public void execute(DatabaseWrapper databaseWrapper) {
-                                    FastStoreModelTransaction
-                                            .saveBuilder(FlowManager.getModelAdapter(Trajet.class))
-                                            .addAll(trajets)
-                                            .build();
+                                    for (Trajet trajet : trajets
+                                         ) {
+                                        trajet.getDepart().save();
+                                        trajet.getDestination().save();
+                                        trajet.getKhettaf().save();
+                                        trajet.save();
+                                    }
+
                                 }
                             }).build();
                             transaction.execute();
+
+                            progressDialog.hide();
+                            progressDialog.dismiss();
 
                             Intent intent = new Intent(ActivityLogin.this, TrajetsMainActivity.class);
                             startActivity(intent);
@@ -218,6 +222,11 @@ public class ActivityLogin extends AppCompatActivity {
                         @Override
                         public void onFailure(Call<List<Trajet>> call, Throwable t) {
                             t.getMessage();
+                            progressDialog.hide();
+                            progressDialog.dismiss();
+                            Snackbar
+                                    .make(findViewById(R.id.loginLayout), R.string.loginFailed, Snackbar.LENGTH_SHORT)
+                                    .show();
                         }
                     });
 

@@ -13,8 +13,9 @@ import me.khettaf.database.AppDatabase;
  * Created by Me on 24/09/2017.
  */
 @Table(database = AppDatabase.class)
-public class POI  extends BaseModel implements Serializable {
+public class POI  extends BaseModel {
 
+    @Column
     @PrimaryKey
     private Long id;
 
@@ -27,15 +28,11 @@ public class POI  extends BaseModel implements Serializable {
     @Column
     private String nom;
 
-    public POI() {
-        //JPA
-    }
-
-    public POI(Double x, Double y, String nom) {
-        X = x;
-        Y = y;
-        this.nom = nom;
-    }
+//    public POI(Double x, Double y, String nom) {
+//        X = x;
+//        Y = y;
+//        this.nom = nom;
+//    }
 
     public String getNom() {
         return nom;

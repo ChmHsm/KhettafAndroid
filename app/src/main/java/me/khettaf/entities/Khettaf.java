@@ -13,8 +13,9 @@ import me.khettaf.database.AppDatabase;
  * Created by Me on 24/09/2017.
  */
 @Table(database = AppDatabase.class)
-public class Khettaf  extends BaseModel implements Serializable  {
+public class Khettaf  extends BaseModel {
 
+    @Column
     @PrimaryKey
     private Long id;
 
@@ -24,14 +25,10 @@ public class Khettaf  extends BaseModel implements Serializable  {
     @Column
     private String password;
 
-    public Khettaf(){
-        //JPA
-    }
-
-    public Khettaf(String username, String password) {
-        this.username = username;
-        this.password = password;
-    }
+//    public Khettaf(String username, String password) {
+//        this.username = username;
+//        this.password = password;
+//    }
 
     public String getUsername() {
         return username;
