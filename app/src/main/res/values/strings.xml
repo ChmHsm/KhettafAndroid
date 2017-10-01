@@ -15,4 +15,10 @@
     <string name="loggingIn">Connexion en cours&#8230;</string>
     <string name="networkUnavailable">Accès internet indisponible</string>
     <string name="loginFailed">Echéc de la connexion</string>
+    <string name="from">De</string>
+    <string name="to">vers</string>
+    <string name="timePronoun">à</string>
+    <string name="unavailableText">Texte non disponible</string>
+    <string name="start">Départ</string>
+    <string name="reconnected">Reconnecté</string>
 </resources>

@@ -170,12 +170,13 @@ public class ActivityLogin extends AppCompatActivity {
 
             if(message != null){
                 if(message.getCode() != 200){
+                    progressDialog.hide();
+                    progressDialog.dismiss();
                     Snackbar
                             .make(findViewById(R.id.loginLayout), R.string.loginFailed, Snackbar.LENGTH_SHORT)
                             .show();
                 }
                 else{
-                    message.getExpiresAt();
                     SharedPreferences sharedPref = getSharedPreferences(
                             getString(R.string.authentication_prefs), Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = sharedPref.edit();
@@ -186,53 +187,14 @@ public class ActivityLogin extends AppCompatActivity {
                     editor.putString(getString(R.string.last_password), password);
                     editor.apply();
 
-                    TrajetsInterface api = ServiceGenerator.createService(TrajetsInterface.class);
-
-                    Call<List<Trajet>> call = api.getAllTrajets(message.getAccessToken());
-                    call.enqueue(new Callback<List<Trajet>>() {
-                        @Override
-                        public void onResponse(Call<List<Trajet>> call, Response<List<Trajet>> response) {
-                            final List<Trajet> trajets = response.body();
-
-
-                            DatabaseDefinition database = FlowManager.getDatabase(AppDatabase.class);
-                            Transaction transaction = database.beginTransactionAsync(new ITransaction() {
-                                @Override
-                                public void execute(DatabaseWrapper databaseWrapper) {
-                                    for (Trajet trajet : trajets
-                                         ) {
-                                        trajet.getDepart().save();
-                                        trajet.getDestination().save();
-                                        trajet.getKhettaf().save();
-                                        trajet.save();
-                                    }
-
-                                }
-                            }).build();
-                            transaction.execute();
-
-                            progressDialog.hide();
-                            progressDialog.dismiss();
-
-                            Intent intent = new Intent(ActivityLogin.this, TrajetsMainActivity.class);
-                            startActivity(intent);
-                            finish();
-                        }
-
-                        @Override
-                        public void onFailure(Call<List<Trajet>> call, Throwable t) {
-                            t.getMessage();
-                            progressDialog.hide();
-                            progressDialog.dismiss();
-                            Snackbar
-                                    .make(findViewById(R.id.loginLayout), R.string.loginFailed, Snackbar.LENGTH_SHORT)
-                                    .show();
-                        }
-                    });
-
+                    Intent intent = new Intent(ActivityLogin.this, TrajetsMainActivity.class);
+                    startActivity(intent);
+                    finish();
                 }
             }
             else{
+                progressDialog.hide();
+                progressDialog.dismiss();
                 Snackbar
                         .make(findViewById(R.id.loginLayout), R.string.loginFailed, Snackbar.LENGTH_SHORT)
                         .show();

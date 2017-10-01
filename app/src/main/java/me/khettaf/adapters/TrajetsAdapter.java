@@ -11,6 +11,8 @@ import me.khettaf.R;
 import me.khettaf.adapters.holders.TrajetViewHolder;
 import me.khettaf.entities.Trajet;
 
+import static me.khettaf.utils.DataManaging.translateDate;
+
 /**
  * Created by Me on 28/09/2017.
  */
@@ -27,7 +29,11 @@ public class TrajetsAdapter extends RecyclerView.Adapter<TrajetViewHolder>{
     public void onBindViewHolder(TrajetViewHolder holder, int position) {
         Trajet trajet = trajets.get(position);
         holder.setTrajet(trajet);
+        holder.titreTextView.setText(trajet.getDestination().getNom());
         holder.departTextView.setText(trajet.getDepart().getNom());
+        holder.destinationTextView.setText(trajet.getDestination().getNom());
+        holder.descriptionTextView.setText(trajet.getDescription());
+        holder.dateTextView.setText(translateDate(trajet.getDateDepart()));
     }
 
     public TrajetViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
